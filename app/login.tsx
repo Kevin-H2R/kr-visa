@@ -5,6 +5,8 @@ import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [isLogin, setIsLogin] = useState(true)
   const getData = async () => {
     try {
       console.log("YOYOYYOYO")
@@ -17,10 +19,30 @@ export default function LoginPage() {
     }
   };
 
-  const login = () => {
+  const login = async () => {
     try {
-      console.log("YEAH")
-      fetch('http://172.18.70.50:3000').then(response => console.log(response)).catch(err => console.log("err: ", err))
+      if (!email || !password) return
+      const response = await fetch('http://localhost:3000/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({email, password})
+      })
+      const data = await response.json()
+      console.log(data)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  const register = async () => {
+    try {
+      if (!email || !password || !confirmPassword) return
+      if (password !== confirmPassword) return // TODO: handle error better
+      const response = await fetch('http://localhost:3000/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({email, password})
+      })
+      const data = await response.json()
+      console.log(data)
     } catch (err) {
       console.log(err)
     }
@@ -41,9 +63,20 @@ export default function LoginPage() {
         value={email} onChangeText={text => setEmail(text)} />
       <TextInput placeholder="Password" secureTextEntry={true}
         style={styles.input} value={password} onChangeText={text => setPassword(text)} />
-      <Pressable style={styles.button} onPress={login}>
-        <Text style={styles.buttonText}>Login</Text>
-      </Pressable>
+        {!isLogin &&
+          <TextInput placeholder="Confirm password" secureTextEntry={true}
+            style={styles.input} value={confirmPassword} onChangeText={text => setConfirmPassword(text)} />}
+        {!isLogin &&
+          <Pressable style={styles.button} onPress={register}>
+            <Text style={styles.buttonText}>Register</Text>
+          </Pressable>}
+        {isLogin &&
+          <Pressable style={styles.button} onPress={login}>
+            <Text style={styles.buttonText}>Login</Text>
+          </Pressable>}
+        <Pressable onPress={() => setIsLogin(!isLogin)}>
+          <Text style={styles.underlineText}>{isLogin ? 'Register' : 'Login'}</Text>
+        </Pressable>
     </View>
   );
 }
@@ -71,4 +104,8 @@ const styles = StyleSheet.create({
     letterSpacing: 0.25,
     color: 'white',
   },
+  underlineText: {
+    color: '#0047A0',
+    textDecorationLine: 'underline'
+  }
 })
