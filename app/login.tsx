@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
@@ -24,9 +25,14 @@ export default function LoginPage() {
       if (!email || !password) return
       const response = await fetch('http://localhost:3000/auth/login', {
         method: 'POST',
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({email, password})
       })
       const data = await response.json()
+      AsyncStorage.setItem('access_token', data['access_token'])
+      AsyncStorage.setItem('refresh_token', data['refresh_token'])
+      AsyncStorage.setItem('email', email)
+      router.replace('/')
       console.log(data)
     } catch (err) {
       console.log(err)
@@ -39,6 +45,7 @@ export default function LoginPage() {
       if (password !== confirmPassword) return // TODO: handle error better
       const response = await fetch('http://localhost:3000/auth/register', {
         method: 'POST',
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({email, password})
       })
       const data = await response.json()

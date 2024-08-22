@@ -11,7 +11,7 @@ export default function Index() {
   useEffect(() => {
     const checkLoggedIn = async () => {
       try {
-        const value = await AsyncStorage.getItem('user');
+        const value = await AsyncStorage.getItem('email');
         console.log('yoyo')
         setIsLoggedIn(!!value)
       } catch (e) {
