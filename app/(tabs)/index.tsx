@@ -31,18 +31,17 @@ export default function Index() {
         gap: 25
       }}
     >
-      {!isLoggedIn &&
-        <View style={styles.visaCard}>
-          {/* <Skeleton width={100} height={150} /> */}
-          <View style={styles.visaSection}/>
-          <View style={{flex: 1, gap: 10, justifyContent:'space-between', height: '100%'}}>
-            <View style={{flex: 1, gap: 10}}>
-              <View style={styles.nameSection} />
-              <View style={styles.nameSection} />
-            </View>
+      <View style={styles.visaCard}>
+        {/* <Skeleton width={100} height={150} /> */}
+        <View style={styles.visaSection}/>
+        <View style={{flex: 1, gap: 10, justifyContent:'space-between', height: '100%'}}>
+          <View style={{flex: 1, gap: 10}}>
+            <View style={styles.nameSection} />
             <View style={styles.nameSection} />
           </View>
-        </View>}
+          <View style={styles.nameSection} />
+        </View>
+      </View>
       <Link href="/login" asChild>
         <Pressable style={styles.button}>
           <Text style={styles.buttonText}>Login to see or add my visa</Text>

@@ -9,17 +9,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [isLogin, setIsLogin] = useState(true)
-  const getData = async () => {
-    try {
-      console.log("YOYOYYOYO")
-      const value = await AsyncStorage.getItem('my-key');
-      if (value !== null) {
-        console.log(value)
-      }
-    } catch (e) {
-      console.log(e)
-    }
-  };
 
   const login = async () => {
     try {
