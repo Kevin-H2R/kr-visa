@@ -12,7 +12,6 @@ export default function Index() {
     const checkLoggedIn = async () => {
       try {
         const value = await AsyncStorage.getItem('email');
-        console.log('yoyo')
         setIsLoggedIn(!!value)
       } catch (e) {
         console.log(e)
@@ -44,7 +43,7 @@ export default function Index() {
       </View>
       <Link href="/login" asChild>
         <Pressable style={styles.button}>
-          <Text style={styles.buttonText}>Login to see or add my visa</Text>
+          <Text style={styles.buttonText}>{isLoggedIn ? "Add my visa" : "Login to see or add my visa"}</Text>
         </Pressable>
       </Link>
     </View>
