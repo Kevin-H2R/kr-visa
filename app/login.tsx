@@ -9,16 +9,42 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [isLogin, setIsLogin] = useState(true)
+  const [error, setError] = useState("")
+  const [isEmailError, setIsEmailError] = useState(false)
+  const [isPasswordError, setIsPasswordError] = useState(false)
+  const [isConfirmationError, setIsConfirmationError] = useState(false)
+
+  const resetErrors = () => {
+    setIsEmailError(false)
+    setIsPasswordError(false)
+    setIsConfirmationError(false)
+    setError("")
+  }
 
   const login = async () => {
     try {
-      if (!email || !password) return
+      resetErrors()
+      if (!email || !password) {
+        if (!email) {
+          setIsEmailError(true)
+        }
+        if (!password) {
+          setIsPasswordError(true)
+        }
+        setError("Fill email & password")
+        return
+      }
       const response = await fetch('http://localhost:3000/auth/login', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({email, password})
       })
       const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.message)
+        return
+      }
       AsyncStorage.setItem('access_token', data['access_token'])
       AsyncStorage.setItem('refresh_token', data['refresh_token'])
       AsyncStorage.setItem('email', email)
@@ -31,14 +57,25 @@ export default function LoginPage() {
 
   const register = async () => {
     try {
-      if (!email || !password || !confirmPassword) return
-      if (password !== confirmPassword) return // TODO: handle error better
+      if (!email || !password || !confirmPassword) {
+        setError("Fill email & password & confirmation")
+        return
+      }
+      if (password !== confirmPassword) {
+        setError('Password and confirmation do no match')
+        return
+      }
+      setError("")
       const response = await fetch('http://localhost:3000/auth/register', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({email, password})
       })
       const data = await response.json()
+      if (!response.ok) {
+        setError(data.message)
+        return
+      }
       console.log(data)
     } catch (err) {
       console.log(err)
@@ -60,13 +97,15 @@ export default function LoginPage() {
         </Pressable>
       </View>
       <View style={{flex: 1, width: '100%', justifyContent: 'center', gap: 15, alignItems: 'center'}}>
-        <TextInput placeholder="Email" style={styles.input}
+        <TextInput placeholder="Email" style={[styles.input, isEmailError ? styles.errorInput : null]}
           value={email} onChangeText={text => setEmail(text)} />
         <TextInput placeholder="Password" secureTextEntry={true}
-          style={styles.input} value={password} onChangeText={text => setPassword(text)} />
+          style={[styles.input, isPasswordError ? styles.errorInput : null]} value={password} onChangeText={text => setPassword(text)} />
           {!isLogin &&
             <TextInput placeholder="Confirm password" secureTextEntry={true}
-              style={styles.input} value={confirmPassword} onChangeText={text => setConfirmPassword(text)} />}
+              style={[styles.input, isConfirmationError ? styles.errorInput : null]}
+              value={confirmPassword} onChangeText={text => setConfirmPassword(text)} />}
+          {error && <Text style={styles.error}>{error}</Text>}
           {!isLogin &&
             <Pressable style={styles.button} onPress={register}>
               <Text style={styles.buttonText}>Register</Text>
@@ -93,6 +132,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 8
   },
+  errorInput: {
+    borderColor: '#CD2E3A'
+  },
   button: {
     paddingVertical: 12,
     paddingHorizontal: 32,
@@ -110,5 +152,10 @@ const styles = StyleSheet.create({
   underlineText: {
     color: '#0047A0',
     textDecorationLine: 'underline'
+  },
+  error: {
+    color:'#CD2E3A',
+    fontSize: 12,
+    fontWeight: 'bold',
   }
 })
