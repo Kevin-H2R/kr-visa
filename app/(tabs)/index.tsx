@@ -11,8 +11,16 @@ export default function Index() {
   useEffect(() => {
     const checkLoggedIn = async () => {
       try {
-        const value = await AsyncStorage.getItem('email');
-        setIsLoggedIn(!!value)
+        const access_token = await AsyncStorage.getItem('access_token');
+        setIsLoggedIn(!!access_token)
+        if (!!access_token) {
+          const response = await fetch('http://localhost:3000/users/visa', {
+            method: 'GET',
+            headers: {'Content-Type': 'application/json', 'authorization': `Bearer ${access_token}`}
+          })
+          const json = await response.json()
+          console.log(json)
+        }
       } catch (e) {
         console.log(e)
       }
