@@ -1,4 +1,4 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getAccessToken } from "@/utils/loginUtility";
 import { Link } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -7,11 +7,12 @@ import { StyleSheet } from 'react-native';
 export default function Index() {
 
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [visa, setVisa] = useState(null)
 
   useEffect(() => {
-    const checkLoggedIn = async () => {
+    const grabUserData = async () => {
       try {
-        const access_token = await AsyncStorage.getItem('access_token');
+        const access_token = await getAccessToken()
         setIsLoggedIn(!!access_token)
         if (!!access_token) {
           const response = await fetch('http://localhost:3000/users/visa', {
@@ -19,13 +20,13 @@ export default function Index() {
             headers: {'Content-Type': 'application/json', 'authorization': `Bearer ${access_token}`}
           })
           const json = await response.json()
-          console.log(json)
+          setVisa(json.visa)
         }
       } catch (e) {
         console.log(e)
       }
     };
-    checkLoggedIn()
+    grabUserData()
   }, [])
 
   return (
@@ -39,7 +40,6 @@ export default function Index() {
       }}
     >
       <View style={styles.visaCard}>
-        {/* <Skeleton width={100} height={150} /> */}
         <View style={styles.visaSection}/>
         <View style={{flex: 1, gap: 10, justifyContent:'space-between', height: '100%'}}>
           <View style={{flex: 1, gap: 10}}>
@@ -51,7 +51,7 @@ export default function Index() {
       </View>
       <Link href="/login" asChild>
         <Pressable style={styles.button}>
-          <Text style={styles.buttonText}>{isLoggedIn ? "Add my visa" : "Login to see or add my visa"}</Text>
+          <Text style={styles.buttonText}>{visa ? "Edit my visa" : isLoggedIn ? "Add my visa" : "Login to see or add my visa"}</Text>
         </Pressable>
       </Link>
     </View>
