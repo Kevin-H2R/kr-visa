@@ -1,4 +1,4 @@
-import { getAccessToken } from "@/utils/loginUtility";
+import { getAccessToken, refresh } from "@/utils/loginUtility";
 import { Link } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -19,7 +19,12 @@ export default function Index() {
             method: 'GET',
             headers: {'Content-Type': 'application/json', 'authorization': `Bearer ${access_token}`}
           })
+          if (response.status === 403) {
+            await refresh()
+            window.location.reload()
+          }
           const json = await response.json()
+          console.log(json)
           setVisa(json.visa)
         }
       } catch (e) {

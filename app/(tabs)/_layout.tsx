@@ -1,29 +1,21 @@
-import { isLoggedIn } from "@/utils/loginUtility";
+import { useAuth } from "@/context/authContext";
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Tabs } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 
 export default function TabLayout() {
-  const [isLogged, setIsLogged] = useState(false)
-  useEffect(() => {
-    const checkIsLoggedIn = async () => {
-      const logged = await isLoggedIn()
-      setIsLogged(logged)
-    }
-    checkIsLoggedIn()
-  }, [])
 
-  const logout = async () => {
-    await AsyncStorage.clear()
-    setIsLogged(false)
-  }
+  const {isLoggedIn, logout} = useAuth()
+
+  useEffect(() => {
+    console.log(isLoggedIn)
+  }, [isLoggedIn])
 
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.iconButton} onPress={logout}>
-        {isLogged && <Ionicons name="log-out-outline" size={24} color="black" />}
+        {isLoggedIn && <Ionicons name="log-out-outline" size={24} color="black" />}
       </TouchableOpacity>
       <Tabs screenOptions={
             {headerShown: false}
