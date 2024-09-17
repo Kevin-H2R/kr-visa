@@ -2,19 +2,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, ReactNode, useContext, useState } from "react";
 
 const AuthContext = createContext<{
-  isLoggedIn: boolean;
   login?: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
-  logout: () => void;
-}>({
-  isLoggedIn: false,
-  login: undefined,
-  logout: () => {}
-});
+  logout?: () => void;
+  refresh?: () => void;
+  isLoggedIn?: () => Promise<boolean>;
+  getAccessToken?: () => Promise<string | null | undefined>;
+}>({});
 
 export const AuthProvider = ({children}: {children: ReactNode}) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const login = async (email: string, password: string) => {
-    console.log("PIEWGFHWEOIGHWEROGIH")
     const response = await fetch('http://localhost:3000/auth/login', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
@@ -28,16 +24,48 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
     AsyncStorage.setItem('access_token', data['access_token'])
     AsyncStorage.setItem('refresh_token', data['refresh_token'])
     AsyncStorage.setItem('email', email)
-    setIsLoggedIn(true)
     return {success: true, message: ""}
+  }
+
+  const isLoggedIn = async () => {
+    try {
+      const access_token = await AsyncStorage.getItem('access_token');
+      return !!access_token
+    } catch (e) {
+      return false
+    }
+  };
+
+  const getAccessToken = async () => {
+    try {
+      const access_token = await AsyncStorage.getItem('access_token');
+      return access_token
+    } catch (e) {
+      console.log(e)
+    }
+  };
+
+  const refresh = async () => {
+    const refresh_token = await AsyncStorage.getItem('refresh_token')
+    const response = await fetch("http://localhost:3000/auth/refresh", {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({token: refresh_token})
+    })
+    if (response.status === 403) {
+      await AsyncStorage.clear()
+      window.location.reload()
+    }
+    const data = await response.json()
+    AsyncStorage.setItem('access_token', data['access_token'])
+    AsyncStorage.setItem('refresh_token', data['refresh_token'])
   }
 
   const logout = async () => {
     await AsyncStorage.clear()
-    setIsLoggedIn(false)
   }
 
-  return <AuthContext.Provider value={{isLoggedIn, login, logout}}>
+  return <AuthContext.Provider value={{isLoggedIn, login, logout, getAccessToken, refresh}}>
     {children}
   </AuthContext.Provider>
 }
